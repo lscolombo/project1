@@ -104,10 +104,11 @@ def login_success(username,password):
 
 @app.route("/search", methods=["POST","GET"])
 def search():
-    results = 'No results found.'
     if request.method == 'POST':
         keyword = request.form.get("keyword")
         results = book_search(keyword)
+        if results.rowcount == 0:
+            results = ['No results found.']
     return render_template('results.html',results=results)
 
 def book_search(keyword):
@@ -117,5 +118,5 @@ def book_search(keyword):
                             OR UPPER(title) like :keyword
                             OR UPPER(author) like :keyword
                             ORDER BY title, author, book_isbn""", 
-                            {"keyword":'%'+keyword.upper()+'%'}).fetchall()
+                            {"keyword":'%'+keyword.upper()+'%'})
     return(results)
