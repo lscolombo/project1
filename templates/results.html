@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+{% extends "layout.html" %}
+
+{% block heading %}
+    Sign in
+{% endblock %}
+
+{% block body %}
+        {% for result in results %}
+            <li>{{ result }}</li>
+        {% endfor %}
+    </form>
+{% endblock %}
+

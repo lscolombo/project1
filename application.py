@@ -1,9 +1,10 @@
 import os
 
-from flask import Flask, session, render_template, request
+from flask import Flask, session, render_template, request, redirect, url_for, flash
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
+
 
 app = Flask(__name__)
 
@@ -31,28 +32,28 @@ def index():
 
 #@app.route("/registrationcheck", methods=["POST","GET"])
 def registrationcheck():
-    username = request.form.get("username")
-    password = request.form.get("password")
-    password_confirmation = request.form.get("password_confirmation")
-    error = ''
+    if request.method == 'POST':
+        username = request.form.get("username")
+        password = request.form.get("password")
+        password_confirmation = request.form.get("password_confirmation")
+        error = None
 
-    if not username:
-        error = 'Username is required.'
-        return render_template("registration.html", error=error)
-    elif not password:
-        error = 'Password is required.'
-        return render_template("registration.html", error=error)
-    elif password != password_confirmation:
-        error = 'Passwords did not match.'
-        return render_template("registration.html", error = error)
-    else:
-        if user_exists(username):
-            error = 'Username is already registered.'
-            return render_template("registration.html", error=error)            
+        if not username:
+            error = 'Username is required.'
+        elif not password:
+            error = 'Password is required.'
+        elif password != password_confirmation:
+            error = 'Passwords did not match.'
         else:
-            #insert new user into database
-            insert_user(username,password)
-            return render_template("search.html", username=username, password=password)
+            if user_exists(username):
+                error = 'Username is already registered.'
+            else:
+                #insert new user into database
+                insert_user(username,password)
+                return redirect(url_for('login'))
+        flash(error)
+    return render_template("registration.html")
+
 
 #    return render_template("registration.html", error=error)            
 
@@ -75,27 +76,46 @@ def insert_user(username,password):
 
 @app.route("/login", methods=["POST","GET"])
 def login():
-    username = request.form.get("username")
-    password = request.form.get("password")
-    success = login_success(username,password)
-    if success:
-        #user exists
-        return render_template("search.html")
-    elif success == 1:
-        #user does not exist in the database
-        return render_template("loginerror.html")
+    error = None
+    if request.method == 'POST':
+        username = request.form.get("username")
+        password = request.form.get("password")
+        error = None
+        user = login_success(username,password)
+        if user is not None:
+            #correct login
+            session.clear()
+            session["user_id"] = user['user_id']
+            return render_template("search.html", user_id=user['user_id'])
+        else:
+            #incorrect login
+            error = 'There has been a problem with your credentials. Please, try again.'
+
+        flash(error)
+
+    return render_template("login.html", error=error)
 
 
 def login_success(username,password):
-    success = db.execute("""SELECT user_id FROM user_account 
+    user = db.execute("""SELECT * FROM user_account 
                 WHERE username = :username AND password = :password""",
                 {"username": username, "password":password}).fetchone()
-    return(success)
+    return(user)
 
-""" @app.route("/search", methods=["POST", "GET"])
+@app.route("/search", methods=["POST","GET"])
 def search():
-    book_search = request.form.get("book_search")
+    results = 'No results found.'
+    if request.method == 'POST':
+        keyword = request.form.get("keyword")
+        results = book_search(keyword)
+    return render_template('results.html',results=results)
 
-def search_db(book_search)
-    #db.execute..
- """
+def book_search(keyword):
+    #keyword = '%'+keyword+'%'
+    results = db.execute("""SELECT * FROM book 
+                            WHERE book_isbn like :keyword
+                            OR UPPER(title) like :keyword
+                            OR UPPER(author) like :keyword
+                            ORDER BY title, author, book_isbn""", 
+                            {"keyword":'%'+keyword.upper()+'%'}).fetchall()
+    return(results)
