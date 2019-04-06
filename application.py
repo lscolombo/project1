@@ -86,7 +86,7 @@ def login():
             #correct login
             session.clear()
             session["user_id"] = user['user_id']
-            return render_template("search.html", user_id=user['user_id'])
+            return redirect(url_for('search'))
         else:
             #incorrect login
             error = 'There has been a problem with your credentials. Please, try again.'
@@ -107,9 +107,10 @@ def search():
     if request.method == 'POST':
         keyword = request.form.get("keyword")
         results = book_search(keyword)
+        return render_template('search.html',results=results)
         if results.rowcount == 0:
             results = ['No results found.']
-    return render_template('results.html',results=results)
+    return render_template('search.html')
 
 def book_search(keyword):
     #keyword = '%'+keyword+'%'

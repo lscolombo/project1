@@ -10,4 +10,15 @@
         <input type="text" name="keyword" placeholder="Search by title, author or ISBN number">
         <button>Search</button>
     </form>
+
+    {% for result in results %}
+        <li>
+            <a href="login.html">
+                Title: {{ result['title'] }}
+                Author: {{ result['author'] }}
+                Year: {{ result['year'] }}
+                ISBN: {{ result['book_isbn'] }}
+            </a>
+        </li>
+    {% endfor %}
 {% endblock %}
