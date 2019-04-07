@@ -4,6 +4,7 @@ from flask import Flask, session, render_template, request, redirect, url_for, f
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
+import requests
 
 
 app = Flask(__name__)
@@ -21,6 +22,7 @@ Session(app)
 engine = create_engine(os.getenv("DATABASE_URL"))
 db = scoped_session(sessionmaker(bind=engine))
 
+GOODREADS_KEY = "lQPRX6ne1CNGAV8raRov1w"
 
 @app.route("/")
 def index():
@@ -124,4 +126,8 @@ def book_search(keyword):
 
 @app.route("/details/<string:book_isbn>", methods=["GET"])
 def details(book_isbn):
-    return str(book_isbn)
+    return str(get_goodreads_data(book_isbn))
+
+def get_goodreads_data(book_isbn):
+    res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": GOODREADS_KEY, "isbns": book_isbn})
+    return(res.json())
