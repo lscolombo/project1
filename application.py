@@ -121,3 +121,7 @@ def book_search(keyword):
                             ORDER BY title, author, book_isbn""", 
                             {"keyword":'%'+keyword.upper()+'%'})
     return(results)
+
+@app.route("/details/<string:book_isbn>", methods=["GET"])
+def details(book_isbn):
+    return str(book_isbn)

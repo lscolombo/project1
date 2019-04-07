@@ -13,7 +13,7 @@
 
     {% for result in results %}
         <li>
-            <a href="login.html">
+            <a href= {{ url_for('details', book_isbn=result['book_isbn']) }}>
                 Title: {{ result['title'] }}
                 Author: {{ result['author'] }}
                 Year: {{ result['year'] }}
