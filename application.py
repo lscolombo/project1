@@ -5,6 +5,7 @@ from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 import requests
+import json
 
 
 app = Flask(__name__)
@@ -114,6 +115,8 @@ def search():
             results = ['No results found.']
     return render_template('search.html')
 
+
+
 def book_search(keyword):
     #keyword = '%'+keyword+'%'
     results = db.execute("""SELECT * FROM book 
@@ -126,8 +129,19 @@ def book_search(keyword):
 
 @app.route("/details/<string:book_isbn>", methods=["GET"])
 def details(book_isbn):
-    return str(get_goodreads_data(book_isbn))
+    rating = str(get_goodreads_avg_rating(book_isbn))
+    return render_template('book.html',book_isbn=book_isbn, rating=rating)
+
+def get_book_cover(book_isbn):
+    res = ("http://covers.openlibrary.org/b/isbn/{book_isbn}-M.jpg",book_isbn)
+    return(res)
 
 def get_goodreads_data(book_isbn):
     res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": GOODREADS_KEY, "isbns": book_isbn})
     return(res.json())
+    
+def get_goodreads_avg_rating(book_isbn):
+    res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": GOODREADS_KEY, "isbns": book_isbn})
+    response = res.json()
+    avg_rating = response['books'][0]['average_rating']
+    return(avg_rating)

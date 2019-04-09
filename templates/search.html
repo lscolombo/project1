@@ -28,7 +28,7 @@
             <div class="resultSection">
             <a href= {{ url_for('details', book_isbn=result['book_isbn']) }}>
              <li class=resultItem>
-                <ul class="resultDetail"><span class="resultTitle">{{ result['title'] }} </span> By {{ result['author'] }}</ul>
+                <ul class="resultDetail"><span class="resultTitle">{{ result['title'] }} </span>By {{ result['author'] }}</ul>
                 <ul class="resultDetail">Year: {{ result['year'] }} - ISBN: {{ result['book_isbn'] }}</ul>
             </li>
             </a>
