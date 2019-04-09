@@ -9,9 +9,10 @@
       
       <title>Book's reviews</title>
       <ul class="menuList">
-          <li class="menuItem"><a href="default.asp">Login</a></li>
+          <li class="menuItem"><a href="{{ url_for('login') }}">Login</a></li>
           <li class="menuItem"><a href="news.asp">Profile</a></li>
           <li class="menuItem"><a href="{{ url_for('search') }}">Search</a></li>
+          <li class="menuName">Book data</li>
       </ul>
       {% block heading %}
       {% endblock %}

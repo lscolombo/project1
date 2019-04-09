@@ -18,6 +18,16 @@ body {
   list-style-type: none;
 }
 
+.menuName {
+  float: left;
+  list-style-type: none;
+  color: white;
+  text-align: center;
+  padding: 20px 22px;
+  font-size: 22px;
+  font-weight: bold;
+}
+
 .menuItem a {
   display: block;
   color: white;
@@ -25,6 +35,7 @@ body {
   padding: 20px 22px;
   text-decoration: none;
 }
+
 
 li a:hover {
   background-color: #33b5e5;
