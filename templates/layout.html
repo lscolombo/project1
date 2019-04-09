@@ -1,10 +1,24 @@
 <!DOCTYPE html>
 <html>
+    <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto:400,100,300,500,700,900|RobotoDraft:400,100,300,500,700,900'>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+ 
     <head>
-        <title>Book reviews</title>
+      <meta charset="UTF-8">
+      
+      <title>Book's reviews</title>
+      <ul class="menuList">
+          <li class="menuItem"><a href="default.asp">Login</a></li>
+          <li class="menuItem"><a href="news.asp">Profile</a></li>
+          <li class="menuItem"><a href="{{ url_for('search') }}">Search</a></li>
+      </ul>
+      {% block heading %}
+      {% endblock %}
     </head>
+
     <body>
-        <h1>{% block heading %}{% endblock %}</h1>
+
 
         {% block body %}
         {% endblock %}

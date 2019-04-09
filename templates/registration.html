@@ -1,25 +1,29 @@
 <!DOCTYPE html>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto:400,100,300,500,700,900|RobotoDraft:400,100,300,500,700,900'>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 {% extends "layout.html" %}
 
 {% block heading %}
-    Sign up
+
 {% endblock %}
 
+
 {% block body %}
-    <form action = "{{ url_for('registrationcheck') }}" method="POST">
-        <input type="text" name="username" placeholder="Enter your email adress">
-        <input type="password" name="password" placeholder="Enter your password">
-        <input type="password" name="password_confirmation" placeholder="Confirm your password">
-    
-    {% with errors = get_flashed_messages() %}        
-        {% if errors %}
-            <ul class =flashes>
-                {% for error in errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
-        <button>Submit</button>
-    </form>
+{% with errors = get_flashed_messages() %}
+{% if errors %}
+    {% for error in errors %}
+    <div class="alert alert-danger" role="alert">{{ error }}</div>
+    {% endfor %}
+{% endif %}
+{% endwith %}
+
+
+<form class="loginForm" action="{{ url_for('registrationcheck') }}" method="POST">
+    <h1>Register</h1>
+    <input type="text" placeholder="enter your email" name="username">
+    <input type="password" placeholder="enter a password" name="password">
+    <input type="password" placeholder="confirm your password" name="password_confirmation">
+    <button class="formButton">Submit</button>
+</form>
 {% endblock %}

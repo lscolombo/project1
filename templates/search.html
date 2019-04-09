@@ -1,24 +1,38 @@
 <!DOCTYPE html>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto:400,100,300,500,700,900|RobotoDraft:400,100,300,500,700,900'>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 {% extends "layout.html" %}
 
 {% block heading %}
-    Search
+
 {% endblock %}
 
 {% block body %}
     <form action = "{{ url_for('search') }}" method="POST">
-        <input type="text" name="keyword" placeholder="Search by title, author or ISBN number">
-        <button>Search</button>
+            <div class="wrap">
+                    <div class="search">
+                       <input type="text" name="keyword" class="searchTerm" placeholder="Enter a title, author or ISBN number">
+                       <button class="button">
+                         Search
+                      </button>
+                    </div>
+                 </div>
     </form>
 
+    <div class="padding"></div>
+
+    
     {% for result in results %}
-        <li>
+        <li class=resultsList>
+            <div class="resultSection">
             <a href= {{ url_for('details', book_isbn=result['book_isbn']) }}>
-                Title: {{ result['title'] }}
-                Author: {{ result['author'] }}
-                Year: {{ result['year'] }}
-                ISBN: {{ result['book_isbn'] }}
+             <li class=resultItem>
+                <ul class="resultDetail"><span class="resultTitle">{{ result['title'] }} </span> By {{ result['author'] }}</ul>
+                <ul class="resultDetail">Year: {{ result['year'] }} - ISBN: {{ result['book_isbn'] }}</ul>
+            </li>
             </a>
+            </div>
         </li>
     {% endfor %}
 {% endblock %}
