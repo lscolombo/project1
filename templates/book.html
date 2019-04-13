@@ -9,9 +9,17 @@
 {% endblock %}
 
 {% block body %}
-<img src=http://covers.openlibrary.org/b/isbn/{{book_isbn}}-M.jpg> 
+<img src=http://covers.openlibrary.org/b/isbn/{{book.isbn}}-M.jpg> 
 
 
-Average rating: {{rating['average_rating']}}
-{{rating}}
+Average rating: {{rating}}<br>
+Title: {{book.title}}<br>
+Author: {{book.author}}<br>
+Year: {{book.year}}<br>
+ISBN: {{book.isbn}}<br>
+
+
+<textarea placeholder="Write a review"></textarea><br>
+<button class="buttonn">Submit</button><br>
+
 {% endblock %}

@@ -23,13 +23,13 @@
     <div class="padding"></div>
 
     
-    {% for result in results %}
+    {% for book in results %}
         <li class=resultsList>
             <div class="resultSection">
-            <a href= {{ url_for('details', book_isbn=result['book_isbn']) }}>
+            <a href= {{ url_for('details', book_isbn=book.isbn) }}>
              <li class=resultItem>
-                <ul class="resultDetail"><span class="resultTitle">{{ result['title'] }} </span>By {{ result['author'] }}</ul>
-                <ul class="resultDetail">Year: {{ result['year'] }} - ISBN: {{ result['book_isbn'] }}</ul>
+                <ul class="resultDetail"><span class="resultTitle">{{ book.title }} </span>By {{ book.author }}</ul>
+                <ul class="resultDetail"> ISBN: {{ book.isbn }}</ul>
             </li>
             </a>
             </div>

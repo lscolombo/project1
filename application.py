@@ -25,6 +25,15 @@ db = scoped_session(sessionmaker(bind=engine))
 
 GOODREADS_KEY = "lQPRX6ne1CNGAV8raRov1w"
 
+class Book:
+    def __init__(self,isbn,title,year,author):
+        self.isbn = isbn
+        self.title = title
+        self.year = year
+        self.author = author
+
+
+
 @app.route("/")
 def index():
     return "Project 1: TODO"
@@ -118,6 +127,7 @@ def search():
 
 
 def book_search(keyword):
+    book_list = []
     #keyword = '%'+keyword+'%'
     results = db.execute("""SELECT * FROM book 
                             WHERE book_isbn like :keyword
@@ -125,12 +135,23 @@ def book_search(keyword):
                             OR UPPER(author) like :keyword
                             ORDER BY title, author, book_isbn""", 
                             {"keyword":'%'+keyword.upper()+'%'})
-    return(results)
 
-@app.route("/details/<string:book_isbn>", methods=["GET"])
+    for result in results:
+        isbn=result['book_isbn']
+        title=result['title']
+        year=result['year']
+        author=result['author']
+        new_book=Book(isbn,title,year,author)
+        book_list.append(new_book)
+
+    return(book_list)
+
+@app.route("/details/<book_isbn>", methods=["GET"])
 def details(book_isbn):
-    rating = str(get_goodreads_avg_rating(book_isbn))
-    return render_template('book.html',book_isbn=book_isbn, rating=rating)
+    rating = get_goodreads_avg_rating(book_isbn)
+    book = get_book_by_isbn(book_isbn)
+    return render_template('book.html',book=book, rating=rating)
+
 
 def get_book_cover(book_isbn):
     res = ("http://covers.openlibrary.org/b/isbn/{book_isbn}-M.jpg",book_isbn)
@@ -145,3 +166,13 @@ def get_goodreads_avg_rating(book_isbn):
     response = res.json()
     avg_rating = response['books'][0]['average_rating']
     return(avg_rating)
+
+def get_book_by_isbn(book_isbn):
+    consult = db.execute("SELECT * FROM book WHERE book_isbn = :book_isbn",
+                        {"book_isbn":book_isbn}).fetchone()
+    isbn=consult['book_isbn']
+    title=consult['title']
+    year=consult['year']
+    author=consult['author']
+    book=Book(isbn,title,year,author)
+    return(book)
