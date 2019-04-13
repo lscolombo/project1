@@ -12,14 +12,43 @@
 <img src=http://covers.openlibrary.org/b/isbn/{{book.isbn}}-M.jpg> 
 
 
-Average rating: {{rating}}<br>
+Average rating: {{avg_rating}}<br>
 Title: {{book.title}}<br>
 Author: {{book.author}}<br>
 Year: {{book.year}}<br>
 ISBN: {{book.isbn}}<br>
 
 
-<textarea placeholder="Write a review"></textarea><br>
-<button class="buttonn">Submit</button><br>
+<form class="sendReviewForm" action="{{ url_for('reviews', book_isbn=book.isbn) }}" method="POST">
+        <h1>Review</h1>
+        <textarea placeholder="Write a review" name="review"></textarea><br>
+        <button class="formButton">Submit</button>
+
+
+    <label class="container">1
+        <input type="radio" name="rating">
+        <span class="checkmark"></span>
+      </label>
+      
+      <label class="container">2
+        <input type="radio" name="rating">
+        <span class="checkmark"></span>
+      </label>
+      
+      <label class="container">3
+        <input type="radio" name="rating">
+        <span class="checkmark"></span>
+      </label>
+      
+      <label class="container">4
+        <input type="radio" name="rating">
+        <span class="checkmark"></span>
+      </label> 
+
+            <label class="container">5
+        <input type="radio" name="rating">
+        <span class="checkmark"></span>
+      </label> 
+</form>
 
 {% endblock %}

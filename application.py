@@ -148,10 +148,19 @@ def book_search(keyword):
 
 @app.route("/details/<book_isbn>", methods=["GET"])
 def details(book_isbn):
-    rating = get_goodreads_avg_rating(book_isbn)
+    avg_rating = get_goodreads_avg_rating(book_isbn)
     book = get_book_by_isbn(book_isbn)
-    return render_template('book.html',book=book, rating=rating)
+    return render_template('book.html',book=book, avg_rating=avg_rating)
 
+@app.route("/details/<book_isbn>", methods=["GET","POST"])
+def reviews(book_isbn):
+    avg_rating = get_goodreads_avg_rating(book_isbn)
+    user_id = session["user_id"]
+    review = request.form.get("review")
+    rating = 2
+    book = get_book_by_isbn(book_isbn)
+    add_review(book_isbn,user_id,review,rating)
+    return render_template('book.html',book=book, avg_rating=avg_rating)
 
 def get_book_cover(book_isbn):
     res = ("http://covers.openlibrary.org/b/isbn/{book_isbn}-M.jpg",book_isbn)
@@ -176,3 +185,14 @@ def get_book_by_isbn(book_isbn):
     author=consult['author']
     book=Book(isbn,title,year,author)
     return(book)
+
+def add_review(book_isbn,user_id,review,rating):
+    db.execute("""INSERT INTO review (book_id,user_id,review_text,review_rating) 
+                VALUES (:book_id, :user_id, :review_text, :review_rating)""",
+                {"book_id": book_isbn, "user_id": user_id, "review_text": review, "review_rating": rating})
+    db.commit()
+
+def get_reviews(book_isbn):
+    results = db.execute("""SELECT * FROM review 
+                        WHERE book_isbn = :book_isbn""",
+                        {"book_isbn":book_isbn})
