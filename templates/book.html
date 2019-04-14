@@ -9,14 +9,35 @@
 {% endblock %}
 
 {% block body %}
-<img src=http://covers.openlibrary.org/b/isbn/{{book.isbn}}-M.jpg> 
 
+{% with errors = get_flashed_messages() %}
+{% if errors %}
+    {% for error in errors %}
+        <div class="alert alert-danger" role="alert">{{ error }}</div>
+    {% endfor %}
+{% endif %}
+{% endwith %}
+
+<img src=http://covers.openlibrary.org/b/isbn/{{book.isbn}}-M.jpg>
 
 Average rating: {{avg_rating}}<br>
 Title: {{book.title}}<br>
 Author: {{book.author}}<br>
 Year: {{book.year}}<br>
 ISBN: {{book.isbn}}<br>
+
+
+{% for rev in reviews %}
+<li class=resultsList>
+    <div class="resultSection">
+     <li class=resultItem>
+        <ul class="resultDetail"><span class="resultTitle">{{ rev['username'] }} </span>Rating: {{ rev['review_rating'] }}</ul>
+        <ul class="resultDetail"> {{ rev['review_text'] }}</ul>
+    </li>
+    </a>
+    </div>
+</li>
+{% endfor %}
 
 
 <form class="sendReviewForm" action="{{ url_for('reviews', book_isbn=book.isbn) }}" method="POST">

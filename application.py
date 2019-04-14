@@ -38,12 +38,18 @@ class Book:
 def index():
     return "Project 1: TODO"
 
+@app.route("/logout", methods=["POST","GET"])
+def logout():
+    error = None
+    session.clear()
+    return render_template("login.html", error=error)
+
 @app.route("/register", methods=["POST","GET"])
 # def registration():
 #     return render_template("registration.html")
 
 #@app.route("/registrationcheck", methods=["POST","GET"])
-def registrationcheck():
+def register():
     if request.method == 'POST':
         username = request.form.get("username")
         password = request.form.get("password")
@@ -62,7 +68,9 @@ def registrationcheck():
             else:
                 #insert new user into database
                 insert_user(username,password)
-                return redirect(url_for('login'))
+                user = login_success(username,password)
+                session["user_id"] = user['user_id']
+                return redirect(url_for('search'))
         flash(error)
     return render_template("registration.html")
 
@@ -148,19 +156,30 @@ def book_search(keyword):
 
 @app.route("/details/<book_isbn>", methods=["GET"])
 def details(book_isbn):
+    error=None
     avg_rating = get_goodreads_avg_rating(book_isbn)
     book = get_book_by_isbn(book_isbn)
-    return render_template('book.html',book=book, avg_rating=avg_rating)
+    reviews = get_reviews(book_isbn)
+    flash(error)
+    return render_template('book.html',error=error,book=book, avg_rating=avg_rating, reviews=reviews)
 
 @app.route("/details/<book_isbn>", methods=["GET","POST"])
 def reviews(book_isbn):
+    error=None
     avg_rating = get_goodreads_avg_rating(book_isbn)
     user_id = session["user_id"]
     review = request.form.get("review")
     rating = 2
     book = get_book_by_isbn(book_isbn)
-    add_review(book_isbn,user_id,review,rating)
-    return render_template('book.html',book=book, avg_rating=avg_rating)
+    error = add_review(book_isbn,user_id,review,rating)
+    reviews = get_reviews(book_isbn)
+    flash(error)
+    return render_template('book.html',error=error,book=book, avg_rating=avg_rating, reviews=reviews)
+
+@app.route("/api/<book_isbn>", methods=["GET"])
+def api(book_isbn):
+    json = get_book_api_data(book_isbn)
+
 
 def get_book_cover(book_isbn):
     res = ("http://covers.openlibrary.org/b/isbn/{book_isbn}-M.jpg",book_isbn)
@@ -187,12 +206,37 @@ def get_book_by_isbn(book_isbn):
     return(book)
 
 def add_review(book_isbn,user_id,review,rating):
-    db.execute("""INSERT INTO review (book_id,user_id,review_text,review_rating) 
-                VALUES (:book_id, :user_id, :review_text, :review_rating)""",
-                {"book_id": book_isbn, "user_id": user_id, "review_text": review, "review_rating": rating})
-    db.commit()
+    error = None
+    if single_book_review_success(user_id,book_isbn):
+        db.execute("""INSERT INTO review (book_id,user_id,review_text,review_rating) 
+                    VALUES (:book_id, :user_id, :review_text, :review_rating)""",
+                    {"book_id": book_isbn, "user_id": user_id, "review_text": review, "review_rating": rating})
+        db.commit()
+    else:
+        error='The user has already written a review for the selected book'
+    return(error)
+
+def single_book_review_success(user_id,book_isbn):
+    result = db.execute("""SELECT * FROM review
+                        WHERE book_id = :book_id AND user_id=:user_id""",
+                        {"user_id":user_id,"book_id":book_isbn}).fetchone()
+    if result is None:
+        return(True)
+    else:
+        return(False)
 
 def get_reviews(book_isbn):
-    results = db.execute("""SELECT * FROM review 
-                        WHERE book_isbn = :book_isbn""",
-                        {"book_isbn":book_isbn})
+    results = db.execute("""SELECT u.username, r.review_text, r.review_rating
+                        FROM review r 
+                        INNER JOIN user_account u on u.user_id = r.user_id
+                        WHERE r.book_id = :book_isbn""",
+                        {"book_isbn":book_isbn}).fetchall()
+    return(results)
+
+def get_book_api_data(book_isbn):
+    result = db.execute("""SELECT b.title, b.author, b.year, 
+                        b.book_isbn, count(r.review_id), avg(r.review_rating)
+                        FROM book b
+                        INNER JOIN review r on r.book_id = b.book_isbn
+                        WHERE b.book_isbn = :book_isbn""", 
+                        {"book_isbn":book_isbn}).fetchone()

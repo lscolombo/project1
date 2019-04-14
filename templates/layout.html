@@ -9,10 +9,16 @@
       
       <title>Book's reviews</title>
       <ul class="menuList">
-          <li class="menuItem"><a href="{{ url_for('login') }}">Login</a></li>
-          <li class="menuItem"><a href="news.asp">Profile</a></li>
-          <li class="menuItem"><a href="{{ url_for('search') }}">Search</a></li>
-          <li class="menuName">Book data</li>
+        {% if not session['user_id'] %}
+            <li class="menuItem"><a href="{{ url_for('login') }}">Login</a></li>
+            <li class="menuItem"><a href="{{ url_for('register') }}">Register</a></li>
+        {% endif %}    
+        {% if session['user_id'] %}
+            <li class="menuItem"><a href="{{ url_for('logout') }}">Logout</a></li>
+        {% endif %}
+        <li class="menuItem"><a href="news.asp">Profile</a></li>
+        <li class="menuItem"><a href="{{ url_for('search') }}">Search</a></li>
+        <li class="menuName">Book data</li>
       </ul>
       {% block heading %}
       {% endblock %}
