@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, session, render_template, request, redirect, url_for, flash
+from flask import Flask, session, render_template, request, redirect, url_for, flash, jsonify
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -179,6 +179,7 @@ def reviews(book_isbn):
 @app.route("/api/<book_isbn>", methods=["GET"])
 def api(book_isbn):
     json = get_book_api_data(book_isbn)
+    return(json)
 
 
 def get_book_cover(book_isbn):
@@ -190,9 +191,12 @@ def get_goodreads_data(book_isbn):
     return(res.json())
     
 def get_goodreads_avg_rating(book_isbn):
-    res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": GOODREADS_KEY, "isbns": book_isbn})
-    response = res.json()
-    avg_rating = response['books'][0]['average_rating']
+    try:
+        res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": GOODREADS_KEY, "isbns": book_isbn})
+        response = res.json()
+        avg_rating = response['books'][0]['average_rating']
+    except:
+        avg_rating='Not available'
     return(avg_rating)
 
 def get_book_by_isbn(book_isbn):
@@ -234,9 +238,12 @@ def get_reviews(book_isbn):
     return(results)
 
 def get_book_api_data(book_isbn):
-    result = db.execute("""SELECT b.title, b.author, b.year, 
+    result = jsonify(dict(db.execute("""SELECT b.title, b.author, b.year, 
                         b.book_isbn, count(r.review_id), avg(r.review_rating)
                         FROM book b
                         INNER JOIN review r on r.book_id = b.book_isbn
-                        WHERE b.book_isbn = :book_isbn""", 
-                        {"book_isbn":book_isbn}).fetchone()
+                        WHERE b.book_isbn = :book_isbn
+                        GROUP BY b.title, b.author, b.year, 
+                        b.book_isbn""", 
+                        {"book_isbn":book_isbn}).fetchone()))
+    return(result)
