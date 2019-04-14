@@ -169,7 +169,7 @@ def reviews(book_isbn):
     avg_rating = get_goodreads_avg_rating(book_isbn)
     user_id = session["user_id"]
     review = request.form.get("review")
-    rating = 2
+    rating = request.form['rating']
     book = get_book_by_isbn(book_isbn)
     error = add_review(book_isbn,user_id,review,rating)
     reviews = get_reviews(book_isbn)
