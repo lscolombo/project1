@@ -10,6 +10,11 @@ import json
 
 app = Flask(__name__)
 
+def page_not_found(e):
+  return render_template('404.html'), 404
+
+app.register_error_handler(404, page_not_found)
+
 # Check for environment variable
 if not os.getenv("DATABASE_URL"):
     raise RuntimeError("DATABASE_URL is not set")
@@ -31,6 +36,7 @@ class Book:
         self.title = title
         self.year = year
         self.author = author
+
 
 
 
@@ -124,13 +130,13 @@ def login_success(username,password):
 
 @app.route("/search", methods=["POST","GET"])
 def search():
+    results = []
     if request.method == 'POST':
         keyword = request.form.get("keyword")
         results = book_search(keyword)
-        return render_template('search.html',results=results)
-        if results.rowcount == 0:
-            results = ['No results found.']
-    return render_template('search.html')
+        if len(results) == 0:
+            return render_template("404.html"),404
+    return render_template('search.html',results=results)
 
 
 
