@@ -192,3 +192,9 @@ form.loginForm * {
   color:#33b5e5;
 }
 
+.coverImage{
+  background-image: url('unknownCover-M.jpg');
+  width: 111px;
+  height: 180px;
+}
+
