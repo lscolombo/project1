@@ -142,8 +142,6 @@ def search():
         return redirect(url_for('login'))
 
 
-
-
 def book_search(keyword):
     book_list = []
     #keyword = '%'+keyword+'%'
@@ -198,6 +196,8 @@ def reviews(book_isbn):
         error='You must be logged in to search for books.'
         flash(error)
         return redirect(url_for('login'))
+
+
 @app.route("/api/<book_isbn>", methods=["GET"])
 def api(book_isbn):
     json = get_book_api_data(book_isbn)
@@ -269,3 +269,13 @@ def get_book_api_data(book_isbn):
                         b.book_isbn""", 
                         {"book_isbn":book_isbn}).fetchone()))
     return(result)
+
+@app.route("/profile", methods=["GET"])
+def profile():
+    user_id = session['user_id']
+    reviews = db.execute("""SELECT r.review_text, r.review_rating, b.book_isbn, b.title, b.author
+                        FROM reviews r 
+                        INNER JOIN books b on b.book_isbn = r.book_id
+                        WHERE r.user_id = :user_id""",
+                        {"user_id":user_id}).fetchall()
+    return render_template("profile.html", reviews=reviews)

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto:400,100,300,500,700,900|RobotoDraft:400,100,300,500,700,900'>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+{% extends "layout.html" %}
+
+{% block heading %}
+
+{% endblock %}
+
+
+{% block body %}  
+    {% for review in reviews %}
+    <div class="row">
+            <li class=resultsList>
+                <div class="resultSection">
+                 <li class=resultItem>
+                    <div class="col-md-12 col-md-offset-5" align="center">
+                    <ul class="resultDetail">Title: {{review['title']}}</ul>
+                    <ul class="resultDetail">Author: {{review['author']}}</ul>
+                    <ul class="resultDetail">Review: {{review['review_text']}}</ul>
+                    <ul class="resultDetail">Rating: {{review['review_rating']}}</ul>
+                    </div>
+                </li>
+                </a>
+                </div>
+            </li>
+    </div>
+    {% endfor %}
+{% endblock %}
