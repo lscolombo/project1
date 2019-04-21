@@ -163,11 +163,13 @@ def book_search(keyword):
 @app.route("/details/<book_isbn>", methods=["GET"])
 def details(book_isbn):
     error=None
+    user_id = session["user_id"]
     dict_goodreads = get_goodreads_data(book_isbn)
     book = get_book_by_isbn(book_isbn)
     reviews = get_reviews(book_isbn)
+    allow_review = single_book_review_success(user_id,book_isbn)
     flash(error)
-    return render_template('book.html',error=error,book=book, avg_rating=dict_goodreads["avg_rating"],ratings_count=dict_goodreads["ratings_count"], reviews=reviews)
+    return render_template('book.html',error=error,book=book, avg_rating=dict_goodreads["avg_rating"],ratings_count=dict_goodreads["ratings_count"], reviews=reviews, allow_review=allow_review)
 
 @app.route("/details/<book_isbn>", methods=["GET","POST"])
 def reviews(book_isbn):
@@ -179,8 +181,9 @@ def reviews(book_isbn):
     book = get_book_by_isbn(book_isbn)
     error = add_review(book_isbn,user_id,review,rating)
     reviews = get_reviews(book_isbn)
+    allow_review = single_book_review_success(user_id,book_isbn)
     flash(error)
-    return render_template('book.html',error=error,book=book, avg_rating=dict_goodreads["avg_rating"],ratings_count=dict_goodreads["ratings_count"], reviews=reviews)
+    return render_template('book.html',error=error,book=book, avg_rating=dict_goodreads["avg_rating"],ratings_count=dict_goodreads["ratings_count"], reviews=reviews, allow_review=allow_review)
 
 @app.route("/api/<book_isbn>", methods=["GET"])
 def api(book_isbn):
@@ -227,7 +230,7 @@ def add_review(book_isbn,user_id,review,rating):
     return(error)
 
 def single_book_review_success(user_id,book_isbn):
-    result = db.execute("""SELECT * FROM review
+    result = db.execute("""SELECT review_text, review_rating FROM review
                         WHERE book_id = :book_id AND user_id=:user_id""",
                         {"user_id":user_id,"book_id":book_isbn}).fetchone()
     if result is None:

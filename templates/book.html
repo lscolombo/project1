@@ -55,40 +55,51 @@
 </div>
 {% endfor %}
 
-<div  class="row">
-    <div class="col-md-12 col-md-offset-5" align="center">
-<form class="sendReviewForm" action="{{ url_for('reviews', book_isbn=book.isbn) }}" method="POST">
-    <h1>Write a review!</h1>
-  <h3>Rating</h3>
-    <label class="radio-inline">1
-        <input type="radio" name="rating" value="1">
-        <span class="checkmark"></span>
-      </label>
-      
-      <label class="radio-inline">2
-        <input type="radio" name="rating" value="2">
-        <span class="checkmark"></span>
-      </label>
-      
-      <label class="radio-inline">3
-        <input type="radio" name="rating" value="3">
-        <span class="checkmark"></span>
-      </label>
-      
-      <label class="radio-inline">4
-        <input type="radio" name="rating" value="4">
-        <span class="checkmark"></span>
-      </label> 
 
-       <label class="radio-inline">5
-        <input type="radio" name="rating" value="5">
-        <span class="checkmark"></span>
-      </label> 
+{% if allow_review %}
+
+<div  class="row">
+  <div class="col-md-12 col-md-offset-5" align="center">
+<form class="sendReviewForm" action="{{ url_for('reviews', book_isbn=book.isbn) }}" method="POST">
+  <h1>Write a review!</h1>
+<h3>Rating</h3>
+  <label class="radio-inline">1
+      <input type="radio" name="rating" value="1">
+      <span class="checkmark"></span>
+    </label>
+    
+    <label class="radio-inline">2
+      <input type="radio" name="rating" value="2">
+      <span class="checkmark"></span>
+    </label>
+    
+    <label class="radio-inline">3
+      <input type="radio" name="rating" value="3">
+      <span class="checkmark"></span>
+    </label>
+    
+    <label class="radio-inline">4
+      <input type="radio" name="rating" value="4">
+      <span class="checkmark"></span>
+    </label> 
+
+     <label class="radio-inline">5
+      <input type="radio" name="rating" value="5">
+      <span class="checkmark"></span>
+    </label> 
 <br>
-      <textarea rows="4" cols="100" placeholder="Write a review" name="review"></textarea><br>
-      <button class="formButton">Submit</button>
+    <textarea rows="4" cols="100" placeholder="Write a review" name="review"></textarea><br>
+    <button class="formButton">Submit</button>
 </form>
 </div>
 </div>
+{% else %}
+<div  class="row">
+  <div class="col-md-12 col-md-offset-5" align="center">
+    You have already written a review for this book.
+  </div>
+</div>
+{% endif %}
+
 
 {% endblock %}
