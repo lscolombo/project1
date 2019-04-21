@@ -81,7 +81,7 @@ def register():
     return render_template("registration.html")
 
 def user_exists(username):
-    exists = db.execute("""SELECT user_id FROM user_account
+    exists = db.execute("""SELECT user_id FROM user_accounts
                         WHERE username = :username""",
                         {"username": username}).fetchone()
     if exists is not None:
@@ -92,7 +92,7 @@ def user_exists(username):
         return False
 
 def insert_user(username,password):
-    db.execute("""INSERT INTO user_account (username,password) 
+    db.execute("""INSERT INTO user_accounts (username,password) 
                 VALUES (:username, :password)""",
                 {"username": username, "password": password})
     db.commit()
@@ -120,7 +120,7 @@ def login():
 
 
 def login_success(username,password):
-    user = db.execute("""SELECT * FROM user_account 
+    user = db.execute("""SELECT * FROM user_accounts 
                 WHERE username = :username AND password = :password""",
                 {"username": username, "password":password}).fetchone()
     return(user)
@@ -147,7 +147,7 @@ def search():
 def book_search(keyword):
     book_list = []
     #keyword = '%'+keyword+'%'
-    results = db.execute("""SELECT * FROM book 
+    results = db.execute("""SELECT * FROM books 
                             WHERE book_isbn like :keyword
                             OR UPPER(title) like :keyword
                             OR UPPER(author) like :keyword
@@ -222,7 +222,7 @@ def get_goodreads_data(book_isbn):
     return(dict_goodreads_data)
 
 def get_book_by_isbn(book_isbn):
-    consult = db.execute("SELECT * FROM book WHERE book_isbn = :book_isbn",
+    consult = db.execute("SELECT * FROM books WHERE book_isbn = :book_isbn",
                         {"book_isbn":book_isbn}).fetchone()
     isbn=consult['book_isbn']
     title=consult['title']
@@ -234,7 +234,7 @@ def get_book_by_isbn(book_isbn):
 def add_review(book_isbn,user_id,review,rating):
     error = None
     if single_book_review_success(user_id,book_isbn):
-        db.execute("""INSERT INTO review (book_id,user_id,review_text,review_rating) 
+        db.execute("""INSERT INTO reviews (book_id,user_id,review_text,review_rating) 
                     VALUES (:book_id, :user_id, :review_text, :review_rating)""",
                     {"book_id": book_isbn, "user_id": user_id, "review_text": review, "review_rating": rating})
         db.commit()
@@ -243,7 +243,7 @@ def add_review(book_isbn,user_id,review,rating):
     return(error)
 
 def single_book_review_success(user_id,book_isbn):
-    result = db.execute("""SELECT review_text, review_rating FROM review
+    result = db.execute("""SELECT review_text, review_rating FROM reviews
                         WHERE book_id = :book_id AND user_id=:user_id""",
                         {"user_id":user_id,"book_id":book_isbn}).fetchone()
     if result is None:
@@ -253,8 +253,8 @@ def single_book_review_success(user_id,book_isbn):
 
 def get_reviews(book_isbn):
     results = db.execute("""SELECT u.username, r.review_text, r.review_rating
-                        FROM review r 
-                        INNER JOIN user_account u on u.user_id = r.user_id
+                        FROM reviews r 
+                        INNER JOIN user_accounts u on u.user_id = r.user_id
                         WHERE r.book_id = :book_isbn""",
                         {"book_isbn":book_isbn}).fetchall()
     return(results)
@@ -262,8 +262,8 @@ def get_reviews(book_isbn):
 def get_book_api_data(book_isbn):
     result = jsonify(dict(db.execute("""SELECT b.title, b.author, b.year, 
                         b.book_isbn, count(r.review_id), avg(r.review_rating)
-                        FROM book b
-                        INNER JOIN review r on r.book_id = b.book_isbn
+                        FROM books b
+                        INNER JOIN reviews r on r.book_id = b.book_isbn
                         WHERE b.book_isbn = :book_isbn
                         GROUP BY b.title, b.author, b.year, 
                         b.book_isbn""", 
