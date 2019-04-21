@@ -15,9 +15,9 @@
         {% endif %}    
         {% if session['user_id'] %}
             <li class="menuItem"><a href="{{ url_for('logout') }}">Logout</a></li>
+            <li class="menuItem"><a href="{{ url_for('profile') }}">My reviews</a></li>
+            <li class="menuItem"><a href="{{ url_for('search') }}">Search</a></li>
         {% endif %}
-        <li class="menuItem"><a href="{{ url_for('profile') }}">My reviews</a></li>
-        <li class="menuItem"><a href="{{ url_for('search') }}">Search</a></li>
         <li class="menuName">Book data</li>
       </ul>
       {% block heading %}
