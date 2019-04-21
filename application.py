@@ -48,7 +48,7 @@ def index():
 def logout():
     error = None
     session.clear()
-    return render_template("login.html", error=error)
+    return render_template("login.html")
 
 @app.route("/register", methods=["POST","GET"])
 # def registration():
@@ -79,9 +79,6 @@ def register():
                 return redirect(url_for('search'))
         flash(error)
     return render_template("registration.html")
-
-
-#    return render_template("registration.html", error=error)            
 
 def user_exists(username):
     exists = db.execute("""SELECT user_id FROM user_account
@@ -119,7 +116,7 @@ def login():
 
         flash(error)
 
-    return render_template("login.html", error=error)
+    return render_template("login.html")
 
 
 def login_success(username,password):
@@ -130,13 +127,20 @@ def login_success(username,password):
 
 @app.route("/search", methods=["POST","GET"])
 def search():
-    results = []
-    if request.method == 'POST':
-        keyword = request.form.get("keyword")
-        results = book_search(keyword)
-        if len(results) == 0:
-            return render_template("404.html"),404
-    return render_template('search.html',results=results)
+    try:
+        session["user_id"]
+        results = []
+        if request.method == 'POST':
+            keyword = request.form.get("keyword")
+            results = book_search(keyword)
+            if len(results) == 0:
+                return render_template("404.html"),404
+        return render_template('search.html',results=results)
+    except KeyError:
+        error='You must be logged in to search for books.'
+        flash(error)
+        return redirect(url_for('login'))
+
 
 
 
@@ -162,29 +166,38 @@ def book_search(keyword):
 
 @app.route("/details/<book_isbn>", methods=["GET"])
 def details(book_isbn):
-    error=None
-    user_id = session["user_id"]
-    dict_goodreads = get_goodreads_data(book_isbn)
-    book = get_book_by_isbn(book_isbn)
-    reviews = get_reviews(book_isbn)
-    allow_review = single_book_review_success(user_id,book_isbn)
-    flash(error)
-    return render_template('book.html',error=error,book=book, avg_rating=dict_goodreads["avg_rating"],ratings_count=dict_goodreads["ratings_count"], reviews=reviews, allow_review=allow_review)
+    try:
+        error=None
+        user_id = session["user_id"]
+        dict_goodreads = get_goodreads_data(book_isbn)
+        book = get_book_by_isbn(book_isbn)
+        reviews = get_reviews(book_isbn)
+        allow_review = single_book_review_success(user_id,book_isbn)
+        flash(error)
+        return render_template('book.html',book=book, avg_rating=dict_goodreads["avg_rating"],ratings_count=dict_goodreads["ratings_count"], reviews=reviews, allow_review=allow_review)
+    except KeyError:
+        error='You must be logged in to search for books.'
+        flash(error)
+        return redirect(url_for('login'))
 
 @app.route("/details/<book_isbn>", methods=["GET","POST"])
 def reviews(book_isbn):
-    error=None
-    dict_goodreads = get_goodreads_data(book_isbn)
-    user_id = session["user_id"]
-    review = request.form.get("review")
-    rating = request.form['rating']
-    book = get_book_by_isbn(book_isbn)
-    error = add_review(book_isbn,user_id,review,rating)
-    reviews = get_reviews(book_isbn)
-    allow_review = single_book_review_success(user_id,book_isbn)
-    flash(error)
-    return render_template('book.html',error=error,book=book, avg_rating=dict_goodreads["avg_rating"],ratings_count=dict_goodreads["ratings_count"], reviews=reviews, allow_review=allow_review)
-
+    try:
+        error=None
+        dict_goodreads = get_goodreads_data(book_isbn)
+        user_id = session["user_id"]
+        review = request.form.get("review")
+        rating = request.form['rating']
+        book = get_book_by_isbn(book_isbn)
+        error = add_review(book_isbn,user_id,review,rating)
+        reviews = get_reviews(book_isbn)
+        allow_review = single_book_review_success(user_id,book_isbn)
+        flash(error)
+        return render_template('book.html',book=book, avg_rating=dict_goodreads["avg_rating"],ratings_count=dict_goodreads["ratings_count"], reviews=reviews, allow_review=allow_review)
+    except KeyError:
+        error='You must be logged in to search for books.'
+        flash(error)
+        return redirect(url_for('login'))
 @app.route("/api/<book_isbn>", methods=["GET"])
 def api(book_isbn):
     json = get_book_api_data(book_isbn)
