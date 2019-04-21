@@ -163,16 +163,16 @@ def book_search(keyword):
 @app.route("/details/<book_isbn>", methods=["GET"])
 def details(book_isbn):
     error=None
-    avg_rating = get_goodreads_avg_rating(book_isbn)
+    dict_goodreads = get_goodreads_data(book_isbn)
     book = get_book_by_isbn(book_isbn)
     reviews = get_reviews(book_isbn)
     flash(error)
-    return render_template('book.html',error=error,book=book, avg_rating=avg_rating, reviews=reviews)
+    return render_template('book.html',error=error,book=book, avg_rating=dict_goodreads["avg_rating"],ratings_count=dict_goodreads["ratings_count"], reviews=reviews)
 
 @app.route("/details/<book_isbn>", methods=["GET","POST"])
 def reviews(book_isbn):
     error=None
-    avg_rating = get_goodreads_avg_rating(book_isbn)
+    dict_goodreads = get_goodreads_data(book_isbn)
     user_id = session["user_id"]
     review = request.form.get("review")
     rating = request.form['rating']
@@ -180,7 +180,7 @@ def reviews(book_isbn):
     error = add_review(book_isbn,user_id,review,rating)
     reviews = get_reviews(book_isbn)
     flash(error)
-    return render_template('book.html',error=error,book=book, avg_rating=avg_rating, reviews=reviews)
+    return render_template('book.html',error=error,book=book, avg_rating=dict_goodreads["avg_rating"],ratings_count=dict_goodreads["ratings_count"], reviews=reviews)
 
 @app.route("/api/<book_isbn>", methods=["GET"])
 def api(book_isbn):
@@ -193,17 +193,17 @@ def get_book_cover(book_isbn):
     return(res)
 
 def get_goodreads_data(book_isbn):
-    res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": GOODREADS_KEY, "isbns": book_isbn})
-    return(res.json())
-    
-def get_goodreads_avg_rating(book_isbn):
     try:
         res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": GOODREADS_KEY, "isbns": book_isbn})
         response = res.json()
         avg_rating = response['books'][0]['average_rating']
+        ratings_count = response['books'][0]['work_ratings_count']
     except:
         avg_rating='Not available'
-    return(avg_rating)
+        ratings_count = 'Not available'
+    dict_goodreads_data = {"avg_rating": avg_rating,
+                        "ratings_count": ratings_count}
+    return(dict_goodreads_data)
 
 def get_book_by_isbn(book_isbn):
     consult = db.execute("SELECT * FROM book WHERE book_isbn = :book_isbn",
