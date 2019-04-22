@@ -138,7 +138,9 @@ def search():
             keyword = request.form.get("keyword")
             results = book_search(keyword)
             if len(results) == 0:
-                return render_template("404.html"),404
+                error = 'No results found.'
+                flash(error)
+                return render_template("search.html")
         return render_template('search.html',results=results)
     except KeyError:
         error='You must be logged in to search for books.'
@@ -264,15 +266,18 @@ def get_reviews(book_isbn):
     return(results)
 
 def get_book_api_data(book_isbn):
-    result = jsonify(dict(db.execute("""SELECT b.title, b.author, b.year, 
-                        b.book_isbn, count(r.review_id), avg(r.review_rating)
-                        FROM books b
-                        INNER JOIN reviews r on r.book_id = b.book_isbn
-                        WHERE b.book_isbn = :book_isbn
-                        GROUP BY b.title, b.author, b.year, 
-                        b.book_isbn""", 
-                        {"book_isbn":book_isbn}).fetchone()))
-    return(result)
+    try:
+        result = jsonify(dict(db.execute("""SELECT b.title, b.author, b.year, 
+                            b.book_isbn, count(r.review_id), avg(r.review_rating)
+                            FROM books b
+                            INNER JOIN reviews r on r.book_id = b.book_isbn
+                            WHERE b.book_isbn = :book_isbn
+                            GROUP BY b.title, b.author, b.year, 
+                            b.book_isbn""", 
+                            {"book_isbn":book_isbn}).fetchone()))
+        return(result)
+    except TypeError:
+        return render_template("404.html")
 
 @app.route("/profile", methods=["GET"])
 def profile():

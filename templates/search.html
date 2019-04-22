@@ -4,8 +4,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 {% extends "layout.html" %}
 
-{% block heading %}
-  
+{% block heading %}  
 {% endblock %}
 
 {% block body %}
@@ -21,6 +20,15 @@
     </form>
 
     <div class="padding"></div>
+
+{% with errors = get_flashed_messages() %}
+    {% if errors %}
+        {% for error in errors %}
+            <div class="alert alert-danger" role="alert">{{ error }}</div>
+        {% endfor %}
+    
+        {% endif %}
+{% endwith %}
 
     
     {% for book in results %}
