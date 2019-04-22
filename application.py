@@ -42,8 +42,12 @@ class Book:
 
 @app.route("/")
 def index():
-    return "Project 1: TODO"
-
+    try:
+        session['user_id']
+        return render_template("search.html")
+    except KeyError:
+        return render_template("registration.html")
+        
 @app.route("/logout", methods=["POST","GET"])
 def logout():
     error = None
@@ -272,10 +276,15 @@ def get_book_api_data(book_isbn):
 
 @app.route("/profile", methods=["GET"])
 def profile():
-    user_id = session['user_id']
-    reviews = db.execute("""SELECT r.review_text, r.review_rating, b.book_isbn, b.title, b.author
-                        FROM reviews r 
-                        INNER JOIN books b on b.book_isbn = r.book_id
-                        WHERE r.user_id = :user_id""",
-                        {"user_id":user_id}).fetchall()
-    return render_template("profile.html", reviews=reviews)
+    try:
+        user_id = session['user_id']
+        reviews = db.execute("""SELECT r.review_text, r.review_rating, b.book_isbn, b.title, b.author
+                            FROM reviews r 
+                            INNER JOIN books b on b.book_isbn = r.book_id
+                            WHERE r.user_id = :user_id""",
+                            {"user_id":user_id}).fetchall()
+        return render_template("profile.html", reviews=reviews)
+    except KeyError:
+        error='You must be logged in.'
+        flash(error)
+        return redirect(url_for('login'))
